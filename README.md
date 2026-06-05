@@ -30,6 +30,7 @@ claude   # sign in once
 # Build the report + both scripts (defaults shown)
 python3 cloudsift.py scoutsuite_results_aws-<id>.js
 
+# Will be generated after u run clousift file:
 # Capture command screenshots  ->  ./screenshots/
 ./capture_screenshots.sh
 
