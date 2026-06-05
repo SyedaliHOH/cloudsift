@@ -1,0 +1,388 @@
+{
+  "commands": [
+    {
+      "title": "CloudTrail Service Not Configured",
+      "severity": "high",
+      "commands": [
+        "aws cloudtrail list-trails --region <Region> --query 'Trails[*].Name'",
+        "aws cloudtrail describe-trails --region <Region> --trail-name-list <TrailName> --query 'trailList[*].IsMultiRegionTrail'"
+      ],
+      "csv": "ARN,Name,MultiRegion",
+      "pafa": "[] or [true] = pass, false = fail"
+    },
+    {
+      "title": "EBS Snapshot Not Encrypted",
+      "severity": "high",
+      "commands": [
+        "aws ec2 describe-snapshots --region <Region> --snapshot-id <SnapshotId> --query 'Snapshots[*].Encrypted'"
+      ],
+      "csv": "ARN,Name,Encrypted",
+      "pafa": "false = fail"
+    },
+    {
+      "title": "EBS Volume Not Encrypted",
+      "severity": "high",
+      "commands": [
+        "aws ec2 describe-volumes --region <Region> --volume-ids <VolumeId> --query 'Volumes[*].Encrypted'"
+      ],
+      "csv": "ARN,Name,Encrypted",
+      "pafa": "false = fail"
+    },
+    {
+      "title": "Drop Invalid Header Fields Disabled",
+      "severity": "high",
+      "commands": [
+        "aws elbv2 describe-load-balancer-attributes --region <Region> --load-balancer-arn <LoadBalancerArn> --query 'Attributes[?(Key==`routing.http.drop_invalid_header_fields.enabled`)].Value'"
+      ],
+      "csv": "Name,ARN,DNS",
+      "pafa": ""
+    },
+    {
+      "title": "Load Balancer Allowing Clear Text (HTTP) Communication",
+      "severity": "high",
+      "commands": [
+        "aws elbv2 describe-listeners --region <Region> --load-balancer-arn <LoadBalancerArn> --query 'Listeners[*].Protocol'"
+      ],
+      "csv": "Name,ARN,DNS",
+      "pafa": "HTTP = fail, HTTPS = pass"
+    },
+    {
+      "title": "Credentials Unused for 90 Days or Greater Are Not Disabled",
+      "severity": "high",
+      "commands": [
+        "aws iam list-access-keys --user-name <UserName>",
+        "aws iam get-access-key-last-used --access-key-id <AccessKeyId>"
+      ],
+      "csv": "Name,AccessKey1LastUsed,AccessKey2LastUsed,PasswordEnabled",
+      "pafa": ""
+    },
+    {
+      "title": "Cross-Account AssumeRole Policy Lacks External ID and MFA",
+      "severity": "high",
+      "commands": [
+        "aws iam get-role --role-name <RoleName>"
+      ],
+      "csv": "Name,ARN",
+      "pafa": "Check if policy contains sts:ExternalId or MFA"
+    },
+    {
+      "title": "Lack of Key Rotation for 90 Days",
+      "severity": "high",
+      "commands": [
+        "aws iam get-user --user-name <UserName>"
+      ],
+      "csv": "ARN,CreateDate",
+      "pafa": ""
+    },
+    {
+      "title": "Managed Policies Allow Overly Broad IAM Access",
+      "severity": "high",
+      "commands": [
+        "aws iam get-policy-version --policy-arn <PolicyArn> --version-id v1 --query 'PolicyVersion.Document'"
+      ],
+      "csv": "PolicyName,RiskPattern,AffectedActions,AttachedRoles",
+      "pafa": ""
+    },
+    {
+      "title": "Managed Policy Allows All Actions",
+      "severity": "high",
+      "commands": [
+        "aws iam get-policy --policy-arn <PolicyArn>"
+      ],
+      "csv": "ARN,Roles,Users",
+      "pafa": ""
+    },
+    {
+      "title": "Root Account without Hardware MFA",
+      "severity": "high",
+      "commands": [
+        "aws iam generate-credential-report",
+        "aws iam get-credential-report --query 'Content' --output text | base64 --decode > cred-report.csv",
+        "cat cred-report.csv | head -n 2"
+      ],
+      "csv": "",
+      "pafa": ""
+    },
+    {
+      "title": "RDS Instance Publicly Accessible",
+      "severity": "high",
+      "commands": [
+        "aws rds describe-db-instances --region <Region> --db-instance-identifier <DBInstanceIdentifier> --query 'DBInstances[*].PubliclyAccessible'"
+      ],
+      "csv": "Name,ARN,MultiAZ",
+      "pafa": "true = fail, false = pass"
+    },
+    {
+      "title": "Single AZ RDS Instance",
+      "severity": "high",
+      "commands": [
+        "aws rds describe-db-instances --region <Region> --db-instance-identifier <DBInstanceIdentifier> --query 'DBInstances[*].MultiAZ'"
+      ],
+      "csv": "Name,ARN,MultiAZ",
+      "pafa": "false = fail, true = pass"
+    },
+    {
+      "title": "Get Actions Authorized to All Principals",
+      "severity": "high",
+      "commands": [
+        "aws s3api get-bucket-policy --bucket <BucketName> --query Policy --output text"
+      ],
+      "csv": "Name,ARN",
+      "pafa": ""
+    },
+    {
+      "title": "ACM Certificate with Transparency Logging Set to Disabled",
+      "severity": "medium",
+      "commands": [
+        "aws acm describe-certificate --certificate-arn <CertificateArn> --region <Region> --query 'Certificate.Options'"
+      ],
+      "csv": "ARN",
+      "pafa": ""
+    },
+    {
+      "title": "Data Events Logging Not Configured",
+      "severity": "medium",
+      "commands": [
+        "aws cloudtrail get-event-selectors --region <Region> --trail-name <TrailArn>"
+      ],
+      "csv": "ARN,DataEventsEnabled",
+      "pafa": ""
+    },
+    {
+      "title": "Data Logging Configuration Not Covering All Resources",
+      "severity": "medium",
+      "commands": [
+        "aws cloudtrail get-event-selectors --region <Region> --trail-name <TrailArn> --query 'EventSelectors[*].DataResources[]'"
+      ],
+      "csv": "ARN,Name",
+      "pafa": ""
+    },
+    {
+      "title": "Alarm without Action",
+      "severity": "medium",
+      "commands": [
+        "aws cloudwatch describe-alarms --region <Region> --alarm-names <AlarmName> --query 'MetricAlarms[*].ActionsEnabled'"
+      ],
+      "csv": "Name,Region",
+      "pafa": "false = fail, true = pass"
+    },
+    {
+      "title": "AWS Config Not Enabled",
+      "severity": "medium",
+      "commands": [
+        "aws configservice describe-configuration-recorders --region <Region>",
+        "aws configservice describe-delivery-channels --region <Region>"
+      ],
+      "csv": "region",
+      "pafa": ""
+    },
+    {
+      "title": "EBS Encryption By Default Is Disabled",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 get-ebs-encryption-by-default --region <Region>"
+      ],
+      "csv": "ebs_default_encryption_key_id,ebs_encryption_default,Region",
+      "pafa": "false = fail, true = pass"
+    },
+    {
+      "title": "Non-empty Rulesets for Default Security Groups",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-security-groups --region <Region> --group-ids <SecurityGroupId> --query 'SecurityGroups[*].[GroupId,IpPermissions,IpPermissionsEgress]'"
+      ],
+      "csv": "ARN,ID,Ingress,Egress",
+      "pafa": ""
+    },
+    {
+      "title": "Security Group Opens All Ports",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-security-groups --region <Region> --group-ids <SecurityGroupId> --query 'SecurityGroups[*].IpPermissions'"
+      ],
+      "csv": "ARN,ID,Ingress",
+      "pafa": ""
+    },
+    {
+      "title": "Unrestricted Network Traffic within Security Group",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-security-groups --region <Region> --group-ids <SecurityGroupId> --query 'SecurityGroups[*].[IpPermissions,IpPermissionsEgress]'"
+      ],
+      "csv": "ARN,ID,Ingress,Egress",
+      "pafa": ""
+    },
+    {
+      "title": "Unused Security Group",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-network-interfaces --region <Region> --filters Name=group-id,Values=<SecurityGroupId>"
+      ],
+      "csv": "ARN,ID",
+      "pafa": "[] = fail (unused)"
+    },
+    {
+      "title": "Lack of Deletion Protection",
+      "severity": "medium",
+      "commands": [
+        "aws elbv2 describe-load-balancer-attributes --region <Region> --load-balancer-arn <LoadBalancerArn> --query 'Attributes[?(Key==`deletion_protection.enabled`)].Value'"
+      ],
+      "csv": "ARN,VpcId,DNSName",
+      "pafa": "false = fail, true = pass"
+    },
+    {
+      "title": "Lack of ELBv2 Access Logs",
+      "severity": "medium",
+      "commands": [
+        "aws elbv2 describe-load-balancer-attributes --region <Region> --load-balancer-arn <LoadBalancerArn> --query 'Attributes[?(Key==`access_logs.s3.enabled`)].Value'"
+      ],
+      "csv": "ARN,VpcId,DNSName",
+      "pafa": "false = fail, true = pass"
+    },
+    {
+      "title": "Group with Inline Policies",
+      "severity": "medium",
+      "commands": [
+        "aws iam list-group-policies --group-name <GroupName> --query 'PolicyNames'"
+      ],
+      "csv": "Name,ARN",
+      "pafa": ""
+    },
+    {
+      "title": "Group with No Users",
+      "severity": "medium",
+      "commands": [
+        "aws iam get-group --group-name <GroupName> --query 'Users'"
+      ],
+      "csv": "Name,ARN",
+      "pafa": "[] = fail (no users)"
+    },
+    {
+      "title": "Role with Inline Policies",
+      "severity": "medium",
+      "commands": [
+        "aws iam list-role-policies --role-name <RoleName> --query 'PolicyNames'"
+      ],
+      "csv": "Name,ARN",
+      "pafa": ""
+    },
+    {
+      "title": "User with inline Policies",
+      "severity": "medium",
+      "commands": [
+        "aws iam list-user-policies --user-name <UserName>"
+      ],
+      "csv": "Name,ARN",
+      "pafa": ""
+    },
+    {
+      "title": "User with Multiple API Keys",
+      "severity": "medium",
+      "commands": [
+        "aws iam list-access-keys --user-name <UserName>"
+      ],
+      "csv": "Name,ARN",
+      "pafa": ""
+    },
+    {
+      "title": "Short Backup Retention Period",
+      "severity": "medium",
+      "commands": [
+        "aws rds describe-db-instances --region <Region> --db-instance-identifier <DBInstanceIdentifier> --query 'DBInstances[*].BackupRetentionPeriod'"
+      ],
+      "csv": "Name,BackupRetentionPeriod",
+      "pafa": "< 7 = fail"
+    },
+    {
+      "title": "Bucket Access Logging Disabled",
+      "severity": "medium",
+      "commands": [
+        "aws s3api get-bucket-logging --bucket <BucketName> --query 'LoggingEnabled'"
+      ],
+      "csv": "Name,ARN",
+      "pafa": "LoggingEnabled = pass, null = fail"
+    },
+    {
+      "title": "Bucket Allowing Clear Text (HTTP) Communication",
+      "severity": "medium",
+      "commands": [
+        "aws s3api get-bucket-policy --bucket <BucketName> --query Policy --output text"
+      ],
+      "csv": "Name,ARN",
+      "pafa": ""
+    },
+    {
+      "title": "Bucket without MFA Delete",
+      "severity": "medium",
+      "commands": [
+        "aws s3api get-bucket-versioning --bucket <BucketName> --query 'MFADelete'"
+      ],
+      "csv": "Name,ARN",
+      "pafa": "Disabled or null = fail, Enabled = pass"
+    },
+    {
+      "title": "Bucket without Versioning",
+      "severity": "medium",
+      "commands": [
+        "aws s3api get-bucket-versioning --bucket <BucketName> --query 'Status'"
+      ],
+      "csv": "Name,ARN",
+      "pafa": "Status: Enabled = pass, Suspended/null = fail"
+    },
+    {
+      "title": "DKIM Not Enabled",
+      "severity": "medium",
+      "commands": [
+        "aws ses list-identities --region <Region>",
+        "aws ses get-identity-dkim-attributes --region <Region> --identities <Identity>"
+      ],
+      "csv": "Identity,Region",
+      "pafa": "DkimEnabled: false = fail, true = pass"
+    },
+    {
+      "title": "Network ACLs Allow All egress Traffic (default)",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-network-acls --region <Region> --network-acl-ids <NetworkAclId> --query 'NetworkAcls[*].Entries[?(RuleAction==`allow`) && (Egress==`true`)] | []'"
+      ],
+      "csv": "ARN,ID",
+      "pafa": ""
+    },
+    {
+      "title": "Network ACLs Allow All ingress Traffic (default)",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-network-acls --region <Region> --network-acl-ids <NetworkAclId> --query 'NetworkAcls[*].Entries[?(RuleAction==`allow`) && (Egress==`false`)] | []'"
+      ],
+      "csv": "ARN,ID",
+      "pafa": ""
+    },
+    {
+      "title": "Subnet with \"Allow All\" egress NACLs",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-network-acls --region <Region> --filters Name=association.subnet-id,Values=<SubnetId>"
+      ],
+      "csv": "ARN,ID,VPC",
+      "pafa": ""
+    },
+    {
+      "title": "Subnet with \"Allow All\" ingress NACLs",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-network-acls --region <Region> --filters Name=association.subnet-id,Values=<SubnetId>"
+      ],
+      "csv": "ARN,ID,VPC",
+      "pafa": ""
+    },
+    {
+      "title": "Subnet without a Flow Log",
+      "severity": "medium",
+      "commands": [
+        "aws ec2 describe-flow-logs --region <Region> --filter Name=resource-id,Values=<SubnetId>"
+      ],
+      "csv": "ARN,VpcId",
+      "pafa": "FlowLogs: [] = fail, non-empty = pass"
+    }
+  ]
+}
