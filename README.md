@@ -50,4 +50,4 @@ python3 cloudsift.py scoutsuite_results_aws-<id>.js
 
 * Commands run via `eval` from your own `commands.json` (trusted input)
 * One `claude` call per finding, so cost scales with finding count
-* Only assess accounts you're authorized to test
+* Only assess accounts you're authorized to test.
